@@ -1,6 +1,7 @@
 *.o
 *.out
 *.csv
-*day/
+day*/
 directory-manager/manager
 *.sh
+.vscode
