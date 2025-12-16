@@ -2,4 +2,5 @@
 *.out
 *.csv
 *day/
-
+directory-manager/manager
+*.sh
