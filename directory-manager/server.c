@@ -63,6 +63,7 @@ int get_message(char *line, int socket) {
     while(1) {
         memset(line, 0, MAX_LINE_LEN);
         if (recv(socket, line, MAX_LINE_LEN, 0)==0) {
+            printf("Connection closed\n");
             close(socket);
             return 0;
         }
@@ -472,15 +473,20 @@ void parse_line(char *line, int socket){
     }
 }
 
-int main(void){
-    char line[MAX_LINE_LEN + 1];
-
+int main(void) {
     int socket = start_server();
-    int connected_socket = recv_connection(socket);
 
-    while (get_message(line, connected_socket)){
-        parse_line(line, connected_socket);
+    while (1) {
+        char line[MAX_LINE_LEN + 1];
+
+        int connected_socket = recv_connection(socket);
+
+        while (get_message(line, connected_socket)){
+            parse_line(line, connected_socket);
+        }
     }
+
+    close(socket);
 
     return 0;
 }
