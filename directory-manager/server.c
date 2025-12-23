@@ -294,13 +294,15 @@ void cmd_print(int nitems, int socket){
     print_profile(0, nitems, socket);
 }
 
-void cmd_read(char *file){
+void cmd_read(char *file, int socket){
     FILE *fpr;
     fpr = fopen(file,"r");
     char line[MAX_LINE_LEN + 1];
+    char *msg;
 
     if(fpr==NULL){
-        fprintf(stderr,"No such file %s\n",file);
+        // fprintf(stderr,"No such file %s\n",file);
+        sprintf(msg, "No such file: %s\n", file);
     }
     else{
         while(fgets(line,1025,fpr)!=NULL){
@@ -309,7 +311,9 @@ void cmd_read(char *file){
             line[0] = '\0';
         }
         fclose(fpr);
+        msg = "Complete register data";
     }
+    send(socket, msg, strlen(msg)+1, 0);
 }
 
 void cmd_write(char *file){
@@ -441,7 +445,7 @@ void exec_command(char *cmd, char *param1, char *param2, char *param_str, int so
         cmd_print(nitems, socket);
     }
     else if(strcmp(cmd,"R")==0){
-        cmd_read(param1);
+        cmd_read(param1, socket);
     }
     else if(strcmp(cmd,"W")==0){
         cmd_write(param1);
