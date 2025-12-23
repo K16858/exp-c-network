@@ -298,11 +298,12 @@ void cmd_read(char *file, int socket){
     FILE *fpr;
     fpr = fopen(file,"r");
     char line[MAX_LINE_LEN + 1];
-    char *msg;
+    char msg[MAX_LINE_LEN+1];
+    memset(msg, 0, MAX_LINE_LEN);;
 
     if(fpr==NULL){
         // fprintf(stderr,"No such file %s\n",file);
-        sprintf(msg, "No such file: %s\n", file);
+        sprintf(msg, "No such file: %s", file);
     }
     else{
         while(fgets(line,1025,fpr)!=NULL){
@@ -311,7 +312,7 @@ void cmd_read(char *file, int socket){
             line[0] = '\0';
         }
         fclose(fpr);
-        msg = "Complete register data";
+        strncpy(msg, "Complete register data", 24);
     }
     send(socket, msg, strlen(msg)+1, 0);
 }
