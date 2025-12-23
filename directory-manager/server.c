@@ -156,8 +156,15 @@ void new_profile(int number,char *line){
     profile_data_store[number].birth.d = atoi(date[2]);
 }
 
-void print_profile(int start,int nitems){
+void print_profile(int start, int nitems, int socket){
+    char *buf;
     int count = 0;
+
+    if (profile_data_nitems == 0) {
+        send(socket, "No data", 8, 0);
+        return;
+    }
+
     if(nitems==0){
         nitems = profile_data_nitems;
     }
@@ -171,17 +178,24 @@ void print_profile(int start,int nitems){
     }
 
     while(nitems!=count&&start<profile_data_nitems){
-        printf("Id    : %d\n",profile_data_store[start].id);
-        printf("Name  : %s\n",profile_data_store[start].name);
-        printf("Birth : %d-",profile_data_store[start].birth.y);
-        printf("%02d-",profile_data_store[start].birth.m);
-        printf("%02d\n",profile_data_store[start].birth.d);
-        printf("Addr. : %s\n",profile_data_store[start].address);
-        printf("Comm  : %s\n\n",profile_data_store[start].disc);
+        char *id, *name, *birth, *addr, *comm;
+
+        sprintf(id, "Id    : %d\n",profile_data_store[start].id);
+        sprintf(name, "Name  : %s\n",profile_data_store[start].name);
+        sprintf(birth, "Birth : %d-%02d-%02d\n",profile_data_store[start].birth.y, profile_data_store[start].birth.m, profile_data_store[start].birth.d);
+        sprintf(addr, "Addr. : %s\n",profile_data_store[start].address);
+        sprintf(comm, "Comm. : %s\n\n",profile_data_store[start].disc);
+
+        strcat(buf, name);
+        strcat(buf, birth);
+        strcat(buf, addr);
+        strcat(buf, comm);
 
         count++;
         start++;
     }
+
+    send(socket, buf, strlen(buf)+1, 0);
 }
 
 void swap(int p1, int p2){
@@ -276,8 +290,8 @@ void cmd_check(void){
     printf("%d profile(s).\n",profile_data_nitems);
 }
 
-void cmd_print(int nitems){
-    print_profile(0,nitems);
+void cmd_print(int nitems, int socket){
+    print_profile(0, nitems, socket);
 }
 
 void cmd_read(char *file){
@@ -341,7 +355,7 @@ void cmd_find(char *word){
     count = search(word,result);
     int i = 0;
     for(i=0;i<count;i++){
-        print_profile(result[i],1);
+        // print_profile(result[i],1);
     }
 }
 
@@ -377,7 +391,7 @@ void cmd_delete(char *word){
     count = search(word,result);
     int i = 0;
     for(i=0;i<count;i++){
-        print_profile(result[i],1);
+        // print_profile(result[i],1);
         delete_number = result[i];
     }
     if(count>1){
@@ -423,8 +437,8 @@ void exec_command(char *cmd, char *param1, char *param2, char *param_str, int so
         cmd_check();
     }
     else if(strcmp(cmd,"P")==0){
-        nitems = atoi(param1);
-        cmd_print(nitems);
+        nitems = 0;
+        cmd_print(nitems, socket);
     }
     else if(strcmp(cmd,"R")==0){
         cmd_read(param1);
@@ -455,13 +469,14 @@ void parse_line(char *line, int socket){
     char *param_str;
     char *ret[100];
     int n;
+
     if(line[0]=='%'){
-        n = split(&line[1],ret,' ',2);
+        n = split(&line[1], ret, ' ', 2);
         cmd = ret[0];
         param1 = ret[1];
         param2 = ret[2];
         if(n>1){
-            sprintf(param_str,"%s %s",ret[1],ret[2]);
+            sprintf(param_str, "%s %s", ret[1], ret[2]);
         }
         else{
             param_str = ret[1];
