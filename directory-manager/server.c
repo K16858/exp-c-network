@@ -475,7 +475,7 @@ int main(void){
     int connected_socket = recv_connection(socket);
 
     while (1){
-        get_line(line,stdin);
+        get_message(line, connected_socket);
         parse_line(line);
     }
 
