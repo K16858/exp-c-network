@@ -455,7 +455,7 @@ int main(void){
     char line[MAX_LINE_LEN + 1];
 
     int socket = start_server();
-    connected_socket = recv_connection(socket);
+    int connected_socket = recv_connection(socket);
 
     while (1){
         get_line(line,stdin);
