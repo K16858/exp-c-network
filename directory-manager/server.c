@@ -58,6 +58,23 @@ void get_line(char *line, FILE *stram){
     }
 }
 
+void get_message(char *line, int socket) {
+    while(1) {
+        memset(line, 0, MAX_LINE_LEN)
+        if (recv(socket, line, MAX_LINE_LEN, 0)==NULL) {
+            send(socket, "InputError", 10, 0);
+            break;
+        }
+        subst(line,'\n','\0');
+        if(line[0]=='\0'){
+            send(socket, "InputError", 10, 0);       
+        }
+        else{
+            break;
+        }
+    }
+}
+
 int split(char *str, char *ret[], char sep, int max){
     int count = 0;
     char *p=str;
