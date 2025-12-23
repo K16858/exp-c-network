@@ -1,7 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+
 #define MAX_LINE_LEN 1024
+#define MAX_DATA 50000
 
 struct date{
     int y;
@@ -17,7 +24,9 @@ struct profile{
     char *disc;
 };
 
-struct profile profile_data_store[50000];
+struct profile profile_data_store[MAX_DATA];
+struct addrinfo hints, *res;
+
 int profile_data_nitems = 0;
 
 int subst(char *str, char c1, char c2){
@@ -407,8 +416,47 @@ void parse_line(char *line){
     }
 }
 
+int start_server() {
+    struct sockaddr_in sa;
+    memset((char *)&sa, 0, sizeof(sa));
+
+    char buf[MAX_LEN];
+
+    int s = socket(AF_INET, SOCK_STREAM, 0);
+
+    int yes = 1;
+    setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+
+    sa.sin_family = AF_INET; // IPv4
+    sa.sin_port = htons(61001); // 待ち受けポート番号
+    sa.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    bind(s, (struct sockaddr*)&sa, sizeof(sa));
+
+    listen(s, 1);
+    printf("Start...\n");
+
+    return s;
+}
+
+int recv_connection(socket) {
+    int connect_s = accept(socket, NULL, NULL);
+    int count = recv(connect_s, buf, MAX_LEN, 0);
+    if (count > 0) {
+        printf("Connected client\n");
+        send(connect_s, "Connected. This is a Server", 28, 0);
+        return connect_s;
+    }
+
+    return 0;
+}
+
 int main(void){
     char line[MAX_LINE_LEN + 1];
+
+    int socket = start_server();
+    connected_socket = recv_connection(socket);
+
     while (1){
         get_line(line,stdin);
         parse_line(line);
