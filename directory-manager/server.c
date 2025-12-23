@@ -93,6 +93,41 @@ int split(char *str, char *ret[], char sep, int max){
     return count;
 }
 
+int start_server() {
+    struct sockaddr_in sa;
+    memset((char *)&sa, 0, sizeof(sa));
+
+    int s = socket(AF_INET, SOCK_STREAM, 0);
+
+    int yes = 1;
+    setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+
+    sa.sin_family = AF_INET; // IPv4
+    sa.sin_port = htons(61001); // 待ち受けポート番号
+    sa.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    bind(s, (struct sockaddr*)&sa, sizeof(sa));
+
+    listen(s, 1);
+    printf("Start...\n");
+
+    return s;
+}
+
+int recv_connection(int socket) {
+    char buf[MAX_LINE_LEN+1];
+
+    int connect_s = accept(socket, NULL, NULL);
+    int count = recv(connect_s, buf, MAX_LINE_LEN, 0);
+    if (count > 0) {
+        printf("Connected client\n");
+        send(connect_s, "Connected. This is a Server", 28, 0);
+        return connect_s;
+    }
+
+    return 0;
+}
+
 void new_profile(int number,char *line){
     int c1, c2;
     char *ret[1000],*date[1000];
@@ -431,41 +466,6 @@ void parse_line(char *line){
     else{
         new_profile(profile_data_nitems,line);
     }
-}
-
-int start_server() {
-    struct sockaddr_in sa;
-    memset((char *)&sa, 0, sizeof(sa));
-
-    int s = socket(AF_INET, SOCK_STREAM, 0);
-
-    int yes = 1;
-    setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
-
-    sa.sin_family = AF_INET; // IPv4
-    sa.sin_port = htons(61001); // 待ち受けポート番号
-    sa.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    bind(s, (struct sockaddr*)&sa, sizeof(sa));
-
-    listen(s, 1);
-    printf("Start...\n");
-
-    return s;
-}
-
-int recv_connection(int socket) {
-    char buf[MAX_LINE_LEN+1];
-
-    int connect_s = accept(socket, NULL, NULL);
-    int count = recv(connect_s, buf, MAX_LINE_LEN, 0);
-    if (count > 0) {
-        printf("Connected client\n");
-        send(connect_s, "Connected. This is a Server", 28, 0);
-        return connect_s;
-    }
-
-    return 0;
 }
 
 int main(void){
