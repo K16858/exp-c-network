@@ -94,7 +94,10 @@ int main(void) {
     while (1){
         get_line(line,stdin);
         int count = send(s, line, MAX_LEN, 0);
-        recv(s, line, count, 0);
+        while(recv(s, line, count, 0)>0 && ) {
+            
+        }
+        
         if (strncmp("!Q", line, 2)!=0) {
             printf("%s\n", line);
         } else {
