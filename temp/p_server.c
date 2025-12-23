@@ -34,7 +34,6 @@
 struct addrinfo hints, *res;
 
 int main(int argc, char *argv[]) {
-    int total_count = 0;
     struct sockaddr_in sa;
     memset((char *)&sa, 0, sizeof(sa));
 
@@ -55,23 +54,32 @@ int main(int argc, char *argv[]) {
     printf("Start...\n");
 
     int connect_s = accept(s, NULL, NULL);
+    int count = recv(connect_s, buf, MAX_LEN, 0);
+    if (count > 0) {
+        printf("Connected\n");
+        send(connect_s, "Connected. This is a Server", 28, 0);
+    }
 
     while (1) {
-        int count = read(connect_s, buf, MAX_LEN);
-        if (count > 0) {
-            write(1, buf, count);
-            total_count += count;
+        int count = recv(connect_s, buf, MAX_LEN, 0);
+        if (strncmp("%Q", buf, 2)!=0) {
+            printf("%s\n", buf);
 
             char result[MAX_LEN];
-            int i = sprintf(result, "strlen: %d\n", count);
-            write(connect_s, result, i);
+            memset(result, 0, MAX_LEN);
+
+            sprintf(result, "Chars: %ld", strlen(buf));
+            printf("%s\n", result);
+            printf("%ld\n", strlen(result));
+            send(connect_s, result, strlen(result)+1, 0);
             printf("Recv\n");
         } else {
+            send(connect_s, "%Q", 4, 0);
             break;
         }
     }
 
-    printf("Recv Complete\n");
+    printf("Close Server\n");
 
     // char result[MAX_LEN];
     // int i = sprintf(result, "strlen: %d\n", total_count);
