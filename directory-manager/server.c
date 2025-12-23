@@ -18,9 +18,9 @@ struct date{
 
 struct profile{
     int id;
-    char name[70];
+    char name[72];
     struct date birth;
-    char address[70];
+    char address[72];
     char *disc;
 };
 
@@ -60,8 +60,8 @@ void get_line(char *line, FILE *stram){
 
 void get_message(char *line, int socket) {
     while(1) {
-        memset(line, 0, MAX_LINE_LEN)
-        if (recv(socket, line, MAX_LINE_LEN, 0)==NULL) {
+        memset(line, 0, MAX_LINE_LEN);
+        if (recv(socket, line, MAX_LINE_LEN, 0)==0) {
             send(socket, "InputError", 10, 0);
             break;
         }
@@ -437,8 +437,6 @@ int start_server() {
     struct sockaddr_in sa;
     memset((char *)&sa, 0, sizeof(sa));
 
-    char buf[MAX_LEN];
-
     int s = socket(AF_INET, SOCK_STREAM, 0);
 
     int yes = 1;
@@ -456,9 +454,11 @@ int start_server() {
     return s;
 }
 
-int recv_connection(socket) {
+int recv_connection(int socket) {
+    char buf[MAX_LINE_LEN+1];
+
     int connect_s = accept(socket, NULL, NULL);
-    int count = recv(connect_s, buf, MAX_LEN, 0);
+    int count = recv(connect_s, buf, MAX_LINE_LEN, 0);
     if (count > 0) {
         printf("Connected client\n");
         send(connect_s, "Connected. This is a Server", 28, 0);
