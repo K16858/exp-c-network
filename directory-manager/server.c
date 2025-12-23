@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <unistd.h>
 
 #define MAX_LINE_LEN 1024
 #define MAX_DATA 50000
@@ -58,18 +59,20 @@ void get_line(char *line, FILE *stram){
     }
 }
 
-void get_message(char *line, int socket) {
+int get_message(char *line, int socket) {
     while(1) {
         memset(line, 0, MAX_LINE_LEN);
         if (recv(socket, line, MAX_LINE_LEN, 0)==0) {
-            send(socket, "InputError", 10, 0);
-            break;
+            close(socket);
+            return 0;
         }
         subst(line,'\n','\0');
         if(line[0]=='\0'){
-            send(socket, "InputError", 10, 0);       
+            send(socket, "InputError", 10, 0);
+            return 1;       
         }
         else{
+            return 1;
             break;
         }
     }
@@ -407,11 +410,12 @@ void cmd_delete(char *word){
     }
 }
 
-void exec_command(char *cmd,char *param1,char *param2,char *param_str){
+void exec_command(char *cmd, char *param1, char *param2, char *param_str, int socket){
     int number;
     int nitems;
     if(strcmp(cmd,"Q")==0){
-        cmd_quit();
+        // cmd_quit();
+        send(socket, "!Q", 4, 0);
     }
     else if(strcmp(cmd,"C")==0){
         cmd_check();
@@ -444,7 +448,7 @@ void exec_command(char *cmd,char *param1,char *param2,char *param_str){
     }
 }
 
-void parse_line(char *line){
+void parse_line(char *line, int socket){
     char *cmd, *param1, *param2;
     char *param_str;
     char *ret[100];
@@ -461,7 +465,7 @@ void parse_line(char *line){
             param_str = ret[1];
         }
 
-        exec_command(cmd,param1,param2,param_str);
+        exec_command(cmd, param1, param2, param_str, socket);
     }
     else{
         new_profile(profile_data_nitems,line);
@@ -474,9 +478,8 @@ int main(void){
     int socket = start_server();
     int connected_socket = recv_connection(socket);
 
-    while (1){
-        get_message(line, connected_socket);
-        parse_line(line);
+    while (get_message(line, connected_socket)){
+        parse_line(line, connected_socket);
     }
 
     return 0;

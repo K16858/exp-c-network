@@ -95,7 +95,7 @@ int main(void) {
         get_line(line,stdin);
         int count = send(s, line, MAX_LEN, 0);
         recv(s, line, count, 0);
-        if (strncmp("%Q", line, 2)!=0) {
+        if (strncmp("!Q", line, 2)!=0) {
             printf("%s\n", line);
         } else {
             printf("Close Server\n");
