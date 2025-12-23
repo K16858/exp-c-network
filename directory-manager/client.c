@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <stdio.h>
 
-#define MAX_LEN 100
+#define MAX_LEN 1024
 
 int subst(char *str, char c1, char c2){
     int c=0;

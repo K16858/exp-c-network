@@ -354,19 +354,20 @@ void cmd_sort(int column){
     }
 }
 
-void cmd_help(void){
-    fprintf(stdout,"Manual:Command List\n");
-    fprintf(stdout,"--------------------------------------------------------\n");
-    fprintf(stdout,"%%Q : Exit the program. Argument is nothing\n");
-    fprintf(stdout,"%%C : Display number of data. Argument is nothing\n");
-    fprintf(stdout,"%%P : Display data. Argument is integer\n");
-    fprintf(stdout,"%%F : Explore and display data. Argument is word\n");
-    fprintf(stdout,"%%R : Read from CSV file. Argument is file name\n");
-    fprintf(stdout,"%%W : Export to CSV file. Argument is file name\n");
-    fprintf(stdout,"%%S : Sort data by column. Argument is column number\n");
-    fprintf(stdout,"%%H : Display command manual. Argument is nothing\n");
-    fprintf(stdout,"%%D : Search and delete data. Argument is word\n");
-    fprintf(stdout,"--------------------------------------------------------\n");
+void cmd_help(int socket){
+    char *msg = "Manual:Command List\n"
+                "--------------------------------------------------------\n"
+                "%%Q : Exit the program. Argument is nothing\n"
+                "%%C : Display number of data. Argument is nothing\n"
+                "%%P : Display data. Argument is integer\n"
+                "%%F : Explore and display data. Argument is word\n"
+                "%%R : Read from CSV file. Argument is file name\n"
+                "%%W : Export to CSV file. Argument is file name\n"
+                "%%S : Sort data by column. Argument is column number\n"
+                "%%H : Display command manual. Argument is nothing\n"
+                "%%D : Search and delete data. Argument is word\n"
+                "--------------------------------------------------------\n";
+    send(socket, msg, strlen(msg)+1, 0);
 }
 
 void cmd_delete(char *word){
@@ -439,7 +440,7 @@ void exec_command(char *cmd, char *param1, char *param2, char *param_str, int so
         cmd_sort(number);    
     }
     else if(strcmp(cmd,"H")==0){
-        cmd_help();
+        cmd_help(socket);
     }
     else if(strcmp(cmd,"D")==0){
         cmd_delete(param_str);
