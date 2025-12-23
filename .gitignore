@@ -3,5 +3,7 @@
 *.csv
 day*/
 directory-manager/manager
+directory-manager/client
+directory-manager/server
 *.sh
 .vscode
