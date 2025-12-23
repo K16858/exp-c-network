@@ -186,15 +186,16 @@ void print_profile(int start, int nitems, int socket){
         sprintf(addr, "Addr. : %s\n",profile_data_store[start].address);
         sprintf(comm, "Comm. : %s\n\n",profile_data_store[start].disc);
 
-        strcat(buf, name);
-        strcat(buf, birth);
-        strcat(buf, addr);
-        strcat(buf, comm);
+        strncat(buf, name, strlen(name));
+        strncat(buf, birth, strlen(birth));
+        strncat(buf, addr, strlen(addr));
+        strncat(buf, comm, strlen(comm));
 
         count++;
         start++;
     }
 
+    printf("%s\n",buf);
     send(socket, buf, strlen(buf)+1, 0);
 }
 
@@ -286,8 +287,12 @@ void cmd_quit(void){
     exit(0);
 }
 
-void cmd_check(void){
-    printf("%d profile(s).\n",profile_data_nitems);
+void cmd_check(int socket){
+    char response[MAX_LINE_LEN];
+    memset(response, 0, MAX_LINE_LEN);
+
+    sprintf(response, "%d profile(s).", profile_data_nitems);
+    send(socket, response, strlen(response)+1, 0);
 }
 
 void cmd_print(int nitems, int socket){
@@ -439,7 +444,7 @@ void exec_command(char *cmd, char *param1, char *param2, char *param_str, int so
         send(socket, "!Q", 4, 0);
     }
     else if(strcmp(cmd,"C")==0){
-        cmd_check();
+        cmd_check(socket);
     }
     else if(strcmp(cmd,"P")==0){
         nitems = 0;
